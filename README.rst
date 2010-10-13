@@ -13,8 +13,11 @@ The second function should have the following signature:
 uint64_t function_name(void* keyA, void* keyB);
 
 This function should compare the two keys and return:
+
 * 0 if the keys are the same.
+
 * A number less than 0 if the keys are in the right order.
+
 * A number bigger than 0 if the keys are not in the right order.
 
 Note that these functions should be passed to the new_rbtree function. However, if a simple address comparison fits your needs then you should call new_simple_rbtree(), which automatically will create the comparison and key functions for you.
