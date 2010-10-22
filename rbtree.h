@@ -19,7 +19,15 @@ typedef struct stree_node{
 
 typedef struct sroot{
   struct stree_node* root;
+  /*Function to extract the key from the given node.
+   * If you need an example on how to set these functions look at the implementation of new_rbtree.
+   */
   void* (*key)(struct stree_node* node);
+  /* Function to compare two keys. This should return:
+   * - 0 if the keys are the same.
+   * - (-1) if the keys are ordered.
+   * - (1) if the key are not ordered.
+   */
   int64_t (*compare)(void* keyA, void* keyB);
 }tree_root;
 

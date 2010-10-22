@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "rbtree.h"
 
+/* Define a special rb node that points to himself. We use this instead of NULL to be able to access its fields. */
 tree_node RBNIL = {
   .node = NULL,
   .color = BLACK,
@@ -21,18 +22,26 @@ static tree_node* new_rbtree_node(void* node){
   return z;
 }
 
+/*********************************************/
+/* Default function to extract key from node. */
 static void* __pointer(tree_node* node){
   return node->node;
 }
 
+/* Default function to compare the keys returned by void* __pointer(tree_node* node)*/
 static int64_t __compare_by_pointer(void* keyA, void* keyB){
   return keyA - keyB;
 }
+/*********************************************/
 
+/* Allocate a new simple rbtree, with the default functions explained above. 
+ * If this function is used, then the function void destroy_rbtree(tree_root* root) must be called to prevent memory leaks. 
+ */
 tree_root* new_simple_rbtree(){
   return new_rbtree(NULL, NULL);  
 }
 
+/* Allocate a new rbtree. If this function is used, then the function void destroy_rbtree(tree_root* root) must be called to prevent memory leaks. */
 tree_root* new_rbtree(void* (*key_function_pointer)(struct stree_node* node),
 		    int64_t (*compare_function_pointer)(void* keyA, void* keyB)){
   tree_root* r = alloc(tree_root, 1);
@@ -47,7 +56,9 @@ tree_root* new_rbtree(void* (*key_function_pointer)(struct stree_node* node),
   return r;
 }
 
-/*WARNNING left_rbrotate assumes that rbrotate_on->right is NOT &RBNIL and that root->parent IS &RBNIL*/
+/*WARNNING left_rbrotate assumes that rbrotate_on->right is NOT &RBNIL and that root->parent IS &RBNIL.
+ * Don't worry, this will never be called if the above isn't true.
+ */
 static void left_rbrotate(tree_root* root, tree_node* rbrotate_on){
   tree_node* y = rbrotate_on->right;
   rbrotate_on->right = y->left;
@@ -70,7 +81,9 @@ static void left_rbrotate(tree_root* root, tree_node* rbrotate_on){
   return;
 }
 
-/*WARNNING right_rbrotate assumes that rbrotate_on->left is NOT &RBNIL and that root->parent IS &RBNIL*/
+/*WARNNING right_rbrotate assumes that rbrotate_on->left is NOT &RBNIL and that root->parent IS &RBNIL.
+ * Don't worry, this will never be called if the above isn't true.
+ */
 static void right_rbrotate(tree_root* root, tree_node* rbrotate_on){
   tree_node* y = rbrotate_on->left;
   rbrotate_on->left = y->right;
@@ -93,6 +106,7 @@ static void right_rbrotate(tree_root* root, tree_node* rbrotate_on){
   return;
 }
 
+/* After the insertion of an element, the red-black tree may not respect its rules. This functions rebuilds the rb tree, making it respect its rules.*/
 static void rb_tree_insert_fixup(tree_root* root, tree_node* z){
   tree_node* y;
 
