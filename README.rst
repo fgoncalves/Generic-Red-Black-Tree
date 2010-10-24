@@ -1,6 +1,15 @@
+Introduction
+============
+This implementation of a red black tree suports any kind of object in it. It is a simple implementation and should compile on all systems.
+
+Although this implementation is generic it requires that the objects stored in it be "malloched" before insertion. The reason for such thing lies in the implementation of destroy_rbtree, which frees the stored nodes.
+
+Be aware that objects with the same key will be overwritten. For example, if we build a tree to store integers and store integer 7 and then integer 7, the first one will be freed.
+
+
 Using it
 ========
-This implementation of a red black tree suports any kind of object in it. For this reason, the user must provide two aditional functions.
+The user must provide two aditional functions.
 
 The first one should have the following signature:
 
