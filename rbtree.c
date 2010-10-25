@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include "rbtree.h"
 
-/* Define a special rb node that points to himself. We use this instead of NULL to be able to access its fields. */
 tree_node RBNIL = {
   .node = NULL,
   .color = BLACK,
@@ -22,26 +22,18 @@ static tree_node* new_rbtree_node(void* node){
   return z;
 }
 
-/*********************************************/
-/* Default function to extract key from node. */
 static void* __pointer(tree_node* node){
   return node->node;
 }
 
-/* Default function to compare the keys returned by void* __pointer(tree_node* node)*/
 static int64_t __compare_by_pointer(void* keyA, void* keyB){
   return keyA - keyB;
 }
-/*********************************************/
 
-/* Allocate a new simple rbtree, with the default functions explained above. 
- * If this function is used, then the function void destroy_rbtree(tree_root* root) must be called to prevent memory leaks. 
- */
 tree_root* new_simple_rbtree(){
   return new_rbtree(NULL, NULL);  
 }
 
-/* Allocate a new rbtree. If this function is used, then the function void destroy_rbtree(tree_root* root) must be called to prevent memory leaks. */
 tree_root* new_rbtree(void* (*key_function_pointer)(struct stree_node* node),
 		    int64_t (*compare_function_pointer)(void* keyA, void* keyB)){
   tree_root* r = alloc(tree_root, 1);
@@ -56,9 +48,7 @@ tree_root* new_rbtree(void* (*key_function_pointer)(struct stree_node* node),
   return r;
 }
 
-/*WARNNING left_rbrotate assumes that rbrotate_on->right is NOT &RBNIL and that root->parent IS &RBNIL.
- * Don't worry, this will never be called if the above isn't true.
- */
+/*WARNNING left_rbrotate assumes that rbrotate_on->right is NOT &RBNIL and that root->parent IS &RBNIL*/
 static void left_rbrotate(tree_root* root, tree_node* rbrotate_on){
   tree_node* y = rbrotate_on->right;
   rbrotate_on->right = y->left;
@@ -81,9 +71,7 @@ static void left_rbrotate(tree_root* root, tree_node* rbrotate_on){
   return;
 }
 
-/*WARNNING right_rbrotate assumes that rbrotate_on->left is NOT &RBNIL and that root->parent IS &RBNIL.
- * Don't worry, this will never be called if the above isn't true.
- */
+/*WARNNING right_rbrotate assumes that rbrotate_on->left is NOT &RBNIL and that root->parent IS &RBNIL*/
 static void right_rbrotate(tree_root* root, tree_node* rbrotate_on){
   tree_node* y = rbrotate_on->left;
   rbrotate_on->left = y->right;
@@ -106,7 +94,6 @@ static void right_rbrotate(tree_root* root, tree_node* rbrotate_on){
   return;
 }
 
-/* After the insertion of an element, the red-black tree may not respect its rules. This functions rebuilds the rb tree, making it respect its rules.*/
 static void rb_tree_insert_fixup(tree_root* root, tree_node* z){
   tree_node* y;
 
@@ -153,7 +140,7 @@ static void rb_tree_insert_fixup(tree_root* root, tree_node* z){
   root->root->color = BLACK;
 }
 
-void rb_tree_insert(tree_root* root, void* node){
+void* rb_tree_insert(tree_root* root, void* node){
   tree_node *y = &RBNIL, *x = root->root;
 
   tree_node *z = new_rbtree_node(node);
@@ -162,9 +149,10 @@ void rb_tree_insert(tree_root* root, void* node){
     y = x;
 
     if(root->compare(root->key(z), root->key(x)) == 0){
+      void* holder = x->node;
       free(z);
       x->node = node;
-      return;
+      return holder;
     }      
 
     if(root->compare(root->key(z), root->key(x)) < 0)
@@ -185,6 +173,7 @@ void rb_tree_insert(tree_root* root, void* node){
   }
 
   rb_tree_insert_fixup(root, z);
+  return NULL;
 }
 
 static tree_node* __search_rbtree_node(tree_root root, void* key){
@@ -306,16 +295,19 @@ static void __rb_tree_delete_fixup(tree_root* root, tree_node* x){
   return;
 }
 
-void rb_tree_delete(tree_root* root, void* key){
-  tree_node *y, *z, *x;
+void* rb_tree_delete(tree_root* root, void* key){
+  tree_node *y, *z, *x, *hold_node_to_delete;
   uint8_t y_original_color;
+  void* node_to_return;
 
-  y = z = __search_rbtree_node(*root, key);
+  hold_node_to_delete = y = z = __search_rbtree_node(*root, key);
 
   if(y == NULL){
     log(W, "Trying to remove a node from tree that does not exist.");
-    return;
+    return NULL;
   }
+
+  node_to_return = y->node;
 
   y_original_color = y->color;
   if(z->left == &RBNIL){
@@ -345,6 +337,9 @@ void rb_tree_delete(tree_root* root, void* key){
     }
   if(y_original_color == BLACK)
     __rb_tree_delete_fixup(root, x);
+
+  free(hold_node_to_delete);
+  return node_to_return;
 }
 
 tree_iterator* new_tree_iterator(tree_root* root){
