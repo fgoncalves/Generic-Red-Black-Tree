@@ -38,20 +38,24 @@ Function description
 ====================
 tree_root* new_simple_rbtree() ::
 
-	   This function creates and returns a rbtree with pointer comparison. The pointers being compared are the addresses of the stored objects.
+	   This function creates and returns a rbtree with pointer comparison. 
+	   The pointers being compared are the addresses of the stored objects.
 
-tree_root* new_rbtree(void* (*key_function_pointer)(struct stree_node* node),
-			   int64_t (*compare_function_pointer)(void* keyA, void* keyB)) ::
+tree_root* new_rbtree(void* (*key_function_pointer)(struct stree_node* node), int64_t (*compare_function_pointer)(void* keyA, void* keyB)) ::
 
-	   This function creates and returns a rbtree with key and compare functions defined by the user. The first function will be used to return a key and the second function will be used to compare keys.
+	   This function creates and returns a rbtree with key and compare functions defined by the user. 
+	   The first function will be used to return a key and the second function will be used to compare keys.
 
 void* rb_tree_insert(tree_root* root, void* node) ::
 
-      This function inserts a node in the given rbtree. If exists a node with the same key in the tree as the node being stored, then a pointer to the older node is returned. This is done so the user can deallocate the memory. Otherwise NULL will be returned.
+      This function inserts a node in the given rbtree. 
+      If exists a node with the same key in the tree as the node being stored, then a pointer to the older node is returned. 
+      This is done so the user can deallocate the memory. Otherwise NULL will be returned.
 
 void* rb_tree_delete(tree_root* root, void* key) ::
 
-      This function removes from the tree the node with the given key. The returned value is a pointer to that node.
+      This function removes from the tree the node with the given key. 
+      The returned value is a pointer to that node.
 
 void* search_rbtree(tree_root root, void* key) ::
       
